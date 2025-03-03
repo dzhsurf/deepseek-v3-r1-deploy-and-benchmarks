@@ -8,7 +8,7 @@ This document provides a comprehensive guide for deploying the DeepSeek V3/R1 67
 
 ## Table of Contents
 
-2. [Deployment Environment and System Configuration](#deployment-envirnoment-and-system-configuration)
+2. [Deployment Environment and System Configuration](#deployment-environment-and-system-configuration)
 3. [Installation and Deployment](#installation-and-deployment)
    - [Prerequisites](#prerequisites)
    - [Installation Steps](#installation-steps)
