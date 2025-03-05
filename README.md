@@ -112,6 +112,16 @@ This section evaluates the service's performance by measuring throughput under d
 
 ![](./docs/images/itl-max-concurrency.jpg)
 
+**QPS 1-24 TTFT/TTLT**
+
+![](./docs/images/ttft-ttlt-max-concurrency-1-24.jpg)
+
+
+
+**QPS 1-100 TTFT/TTLT**
+
+![](./docs/images/ttft-ttlt-max-concurrency.jpg)
+
 
 
 ## Comparative Analysis
