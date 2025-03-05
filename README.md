@@ -93,7 +93,24 @@ MODEL=cognitivecomputations/DeepSeek-V3-AWQ \
 To execute the benchmark, run the appropriate commands as outlined in our instructions. For more details about how to run benchmarks and configure the environment, please refer to [Benchmarks Utils](./deploy/benchmarks/README.md).
 
 
+
 ## Performance Throughput Benchmarking
+
+This section evaluates the service's performance by measuring throughput under different concurrency limitations on the server.
+
+
+
+**QPS 1-5 Throughput**
+
+![](./docs/images/throughput-max-concurrency-1-5.jpg)
+
+**QPS 1-200 Throughput**
+
+![](./docs/images/throughput-max-concurrency.jpg)
+
+**QPS 1-100 ITL**
+
+![](./docs/images/itl-max-concurrency.jpg)
 
 
 
