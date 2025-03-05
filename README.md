@@ -8,24 +8,15 @@ This document provides a comprehensive guide for deploying the DeepSeek V3/R1 67
 
 ## Table of Contents
 
-2. [Deployment Environment and System Configuration](#deployment-environment-and-system-configuration)
-3. [Installation and Deployment](#installation-and-deployment)
-   - [Prerequisites](#prerequisites)
-   - [Installation Steps](#installation-steps)
-   - [Deployment Configuration](#deployment-configuration)
-4. [Performance Throughput Benchmarking](#performance-throughput-benchmarking)
-   - [Benchmarking Methodology](#benchmarking-methodology)
-   - [Parameter Configurations and Evaluation](#parameter-configurations-and-evaluation)
-   - [Performance Results](#performance-results)
-5. [Comparative Analysis](#comparative-analysis)
-   - [Different Parameter Settings](#different-parameter-settings)
-   - [Observations and Recommendations](#observations-and-recommendations)
-6. [Multi-Node Deployment and Testing under Kubernetes](#multi-node-deployment-and-testing-under-kubernetes)
+1. [Deployment Environment and System Configuration](#deployment-environment-and-system-configuration)
+2. [Environment Setup and Benchmarking](#environment-setup-and-benchmarking)
+3. [Performance Throughput Benchmarking](#performance-throughput-benchmarking)
+4. [Comparative Analysis](#comparative-analysis)
+5. [Multi-Node Deployment and Testing under Kubernetes](#multi-node-deployment-and-testing-under-kubernetes)
    - [Deployment Configuration](#deployment-configuration)
    - [Parameter Configuration](#parameter-configuration)
    - [Performance Test Results](#performance-test-results)
    - [Comparative Analysis](#comparative-analysis)
-6. [License](#license)
 
 ---
 
@@ -62,8 +53,44 @@ Under AWQ, the model's 671B parameters are quantized from 8-bit to 4-bit, reduci
 
 
 
-## Installation and Deployment
+## Environment Setup and Benchmarking
 
+### Prerequisites  
+Make sure you have the following before proceeding:  
+- Ubuntu 22.04  
+- NVIDIA drivers installed
+
+### Base Environment Installation  
+Install Docker and NVIDIA Container Runtime. You can either follow the official documentation or use the provided setup script:
+
+```shell
+./deploy/scripts/env_setup.sh
+```
+
+### Setting Up the vLLM Environment  
+
+Navigate to the `deploy/benchmarks` directory. Create a `.env` file and set your Hugging Face token along with any other necessary environment variables:
+
+```shell
+HF_TOKEN=...
+```
+
+### Running the vLLM Server
+
+Execute the following command to start the vllm server. Customize the parameters (e.g., `MODEL`, `TENSOR_PARALLEL_SIZE`, etc.) as needed:
+
+```shell
+MODEL=cognitivecomputations/DeepSeek-V3-AWQ \
+    TENSOR_PARALLEL_SIZE=8 \
+    PIPELINE_PARALLEL_SIZE=1 \
+    MAX_MODEL_LEN=8000 \
+    MAX_NUM_SEQS=128 \
+    docker compose -f docker-compose.yaml up vllm-server
+```
+
+### Running the Benchmark
+
+To execute the benchmark, run the appropriate commands as outlined in our instructions. For more details about how to run benchmarks and configure the environment, please refer to [Benchmarks Utils](./deploy/benchmarks/README.md).
 
 
 ## Performance Throughput Benchmarking
