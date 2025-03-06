@@ -100,25 +100,25 @@ This section evaluates the service's performance by measuring throughput under d
 
 
 
-**QPS 1-5 Throughput**
+**Concurrency 1-5 Throughput**
 
 ![](./docs/images/throughput-max-concurrency-1-5.jpg)
 
-**QPS 1-200 Throughput**
+**Concurrency 1-200 Throughput**
 
 ![](./docs/images/throughput-max-concurrency.jpg)
 
-**QPS 1-100 ITL**
+**Concurrency 1-100 ITL**
 
 ![](./docs/images/itl-max-concurrency.jpg)
 
-**QPS 1-24 TTFT/TTLT**
+**Concurrency 1-24 TTFT/TTLT**
 
 ![](./docs/images/ttft-ttlt-max-concurrency-1-24.jpg)
 
 
 
-**QPS 1-100 TTFT/TTLT**
+**Concurrency 1-100 TTFT/TTLT**
 
 ![](./docs/images/ttft-ttlt-max-concurrency.jpg)
 
