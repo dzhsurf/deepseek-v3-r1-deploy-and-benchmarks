@@ -246,5 +246,26 @@ The larger the number of output tokens, the overall token throughput is signific
 
 
 
+**vLLM vs SGLang**
 
+In addition to vLLM, there are other excellent open-source projects for model serving, such as SGLang ([https://github.com/sgl-project/sglang ](https://github.com/sgl-project/sglang)).
 
+Here, we also perform a throughput comparison under max concurrency.
+
+**Concurrency 1-5**
+
+![](./docs/images/sgl-throughput-max-concurrency-1-5.jpg)
+
+**Concurrency 1-14**
+
+![](./docs/images/sgl-throughput-max-concurrency.jpg)
+
+**TTFT/TTLT**
+
+![](./docs/images/sgl-ttft-ttlt-max-concurrency.jpg)
+
+**Median/P99 ITL**
+
+![](./docs/images/sgl-median-p99-itl-max-concurrency.jpg)
+
+It can be seen that in terms of concurrent throughput, SGLang is much lower than vLLM. Also, while the ITL latency is overall higher with SGLang, the TTFT is relatively lower, allowing the model to output immediately. The official SGLang documentation states that deploying V3 would yield higher efficiency, but I found that the benchmarks are using an 8-card H200 setup or a 2-node, 8-card H100 setup. Is this issue due to the configuration of my deployed SGLang server, or has there been no optimization for concurrent processing of ultra-large parameter AWQ quantized models?
