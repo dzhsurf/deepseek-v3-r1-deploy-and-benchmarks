@@ -168,3 +168,12 @@ Regarding TTFT (Total Time to First Token) and TTLT (Total Time to Last Token), 
 
 ![](./docs/images/ttft-ttlt-max-concurrency.jpg)
 
+
+
+**How does the model's processing performance behave under different QPS?** 
+
+**QPS 1-20: Server vs Client Request Rate** 
+
+![](./docs/images/server-client-request-rate.jpg)
+
+It can be seen that when the server's processing speed reaches 2.75 QPS.
