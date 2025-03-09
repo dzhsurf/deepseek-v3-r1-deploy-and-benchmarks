@@ -49,6 +49,10 @@ Deploying the full-scale 671B DeepSeek V3 model in FP8 would require an enormous
 
 Under AWQ, the model's 671B parameters are quantized from 8-bit to 4-bit, reducing weight storage to approximately 335GB. Additionally, there are about 37B activated parameters stored in FP16, taking up roughly 37GB. Combined, this consumes around 400GB of VRAM, allowing the model to run on an 8×H100 setup with 640GB VRAM and leaving ample space for cache during serving deployment.
 
+![](./docs/images/vllm-load-v3.jpg)
+
+It can be seen that loading the model weights consumes 50GB of VRAM, and with 8 GPUs, it amounts to about 400GB of VRAM, which is consistent with the computation.
+
 
 
 ## Environment Setup and Benchmarking
