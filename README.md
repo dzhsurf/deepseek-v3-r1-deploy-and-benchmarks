@@ -1,22 +1,20 @@
 # Deploy DeepSeek-V3/R1 671B on 8xH100 and Throughput Benchmarks
 
->  Note: This repository is currently in an editing phase.
-
 This document provides a comprehensive guide for deploying the DeepSeek V3/R1 671B model with serving on a single machine with 8xH100 GPUs. It also contains detailed performance throughput benchmarks under various parameter configurations. This document is intended to help users understand the deployment process as well as the service capabilities provided within a hardware resource environment.
 
 
 
 ## Table of Contents
 
-1. [Deployment Environment and System Configuration](#deployment-environment-and-system-configuration)
-2. [Environment Setup and Benchmarking](#environment-setup-and-benchmarking)
-3. [Benchmarking LLM Throughput and Concurrency](#benchmarking-llm-throughput-and-concurrency)
-4. [Comparative Analysis](#comparative-analysis)
-5. [Multi-Node Deployment and Testing under Kubernetes](#multi-node-deployment-and-testing-under-kubernetes)
-   - [Deployment Configuration](#deployment-configuration)
-   - [Parameter Configuration](#parameter-configuration)
-   - [Performance Test Results](#performance-test-results)
-   - [Comparative Analysis](#comparative-analysis)
+[I. Deployment Environment and System Configuration](#deployment-environment-and-system-configuration)
+
+[II. Environment Setup and Benchmarking](#environment-setup-and-benchmarking)
+
+[III. Benchmarking LLM Throughput and Concurrency](#benchmarking-llm-throughput-and-concurrency)
+
+[IV. Comparative Analysis](#comparative-analysis)
+
+[V. Multi-Node Deployment and Testing under Kubernetes](#multi-node-deployment-and-testing-under-kubernetes)
 
 ---
 
@@ -269,3 +267,8 @@ Here, we also perform a throughput comparison under max concurrency.
 ![](./docs/images/sgl-median-p99-itl-max-concurrency.jpg)
 
 It can be seen that in terms of concurrent throughput, SGLang is much lower than vLLM. Also, while the ITL latency is overall higher with SGLang, the TTFT is relatively lower, allowing the model to output immediately. The official SGLang documentation states that deploying V3 would yield higher efficiency, but I found that the benchmarks are using an 8-card H200 setup or a 2-node, 8-card H100 setup. Is this issue due to the configuration of my deployed SGLang server, or has there been no optimization for concurrent processing of ultra-large parameter AWQ quantized models?
+
+
+
+## Multi-Node Deployment and Testing under Kubernetes
+
