@@ -1,0 +1,77 @@
+
+services:
+  vllm-rayhead:
+    hostname: node
+    image: vllm/vllm-openai
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+              device_ids: ['0,1,2,3,4,5,6,7']
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+      - ./ray-clusters/run_ray_cluster.sh:/app/run_ray_cluster.sh
+    env_file:
+      - ../.env
+    shm_size: '10g'
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["/app/run_ray_cluster.sh --head --port=6379"]
+    # Uncomment to enable IB
+    # devices:
+    #   - /dev/infiniband:/dev/infiniband
+    # Uncomment to use host network
+    # network_mode: host
+    # privileged: true
+    environment:
+      MODEL: Infermatic/Llama-3.3-70B-Instruct-FP8-Dynamic
+      NUM_SEQS: 128
+      TENSOR_PARALLEL_SIZE: 8
+      PIPELINE_PARALLEL_SIZE: 2
+      # Uncomment to setup raycluster device info
+      # # VLLM config
+      # VLLM_HOST_IP: <NODE_IP>
+      # VLLM_LOGGING_LEVEL: DEBUG
+      # # NCCL config
+      # GLOO_SOCKET_IFNAME: <IFNAME>
+      # NCCL_SOCKET_IFNAME: <IFNAME>
+      # NCCL_DEBUG: TRACE
+      # NCCL_IB_HCA: mlx5
+      # # NCCL_IB_DISABLE: 0
+    ports:
+      - 8000:8000
+  vllm-worker:
+    hostname: node
+    image: vllm/vllm-openai
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+              device_ids: ['0,1,2,3,4,5,6,7']
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+      - ./ray-clusters/run_ray_cluster.sh:/app/run_ray_cluster.sh
+    env_file:
+      - ../.env
+    shm_size: '10g'
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["/app/run_ray_cluster.sh --worker"]
+    # Uncomment to enable IB
+    # devices:
+    #   - /dev/infiniband:/dev/infiniband
+    # Uncomment to use host network
+    # network_mode: host
+    # privileged: true
+    environment:
+      RAYHEAD_ADDRESS: vllm-rayhead:6379
+      # Uncomment to setup raycluster device info
+      # # VLLM config
+      # VLLM_HOST_IP: <NODE_IP>
+      # VLLM_LOGGING_LEVEL: DEBUG
+      # # NCCL config
+      # GLOO_SOCKET_IFNAME: <IFNAME>
+      # NCCL_SOCKET_IFNAME: <IFNAME>
+      # NCCL_DEBUG: TRACE
+      # NCCL_IB_HCA: mlx5
+      # # NCCL_IB_DISABLE: 0

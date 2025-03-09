@@ -276,3 +276,156 @@ It can be seen that in terms of concurrent throughput, SGLang is much lower than
 
 ## Multi-Node Deployment and Testing under Kubernetes
 
+In a multi-node environment, to deploy vLLM we can use the Ray provided by vLLM to build a Ray cluster for pipeline parallelism.
+
+Ray head node: 
+
+```yaml
+  vllm-rayhead:
+    hostname: node
+    image: vllm/vllm-openai
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+              device_ids: ['0,1,2,3,4,5,6,7']
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+      - ./ray-clusters/run_ray_cluster.sh:/app/run_ray_cluster.sh
+    env_file:
+      - ../.env
+    shm_size: '10g'
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["/app/run_ray_cluster.sh --head --port=6379"]
+    # Uncomment to enable IB
+    # devices:
+    #   - /dev/infiniband:/dev/infiniband
+    # Uncomment to use host network
+    # network_mode: host
+    # privileged: true
+    environment:
+      MODEL: Infermatic/Llama-3.3-70B-Instruct-FP8-Dynamic
+      NUM_SEQS: 128
+      TENSOR_PARALLEL_SIZE: 8
+      PIPELINE_PARALLEL_SIZE: 2
+      # Uncomment to setup raycluster device info
+      # # VLLM config
+      # VLLM_HOST_IP: <NODE_IP>
+      # VLLM_LOGGING_LEVEL: DEBUG
+      # # NCCL config
+      # GLOO_SOCKET_IFNAME: <IFNAME>
+      # NCCL_SOCKET_IFNAME: <IFNAME>
+      # NCCL_DEBUG: TRACE
+      # NCCL_IB_HCA: mlx5
+      # # NCCL_IB_DISABLE: 0
+    ports:
+      - 8000:8000
+```
+
+Ray worker node 
+
+```yaml
+  vllm-worker:
+    hostname: node
+    image: vllm/vllm-openai
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+              device_ids: ['0,1,2,3,4,5,6,7']
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+      - ./ray-clusters/run_ray_cluster.sh:/app/run_ray_cluster.sh
+    env_file:
+      - ../.env
+    shm_size: '10g'
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["/app/run_ray_cluster.sh --worker"]
+    # Uncomment to enable IB
+    # devices:
+    #   - /dev/infiniband:/dev/infiniband
+    # Uncomment to use host network
+    # network_mode: host
+    # privileged: true
+    environment:
+      RAYHEAD_ADDRESS: vllm-rayhead:6379
+      # Uncomment to setup raycluster device info
+      # # VLLM config
+      # VLLM_HOST_IP: <NODE_IP>
+      # VLLM_LOGGING_LEVEL: DEBUG
+      # # NCCL config
+      # GLOO_SOCKET_IFNAME: <IFNAME>
+      # NCCL_SOCKET_IFNAME: <IFNAME>
+      # NCCL_DEBUG: TRACE
+      # NCCL_IB_HCA: mlx5
+      # # NCCL_IB_DISABLE: 0
+```
+
+On two nodes, run the ray head and ray worker respectively.
+
+Once the ray head starts, it will wait for workers to join until the required node conditions are met.
+
+![](./docs/images/2node-waiting-worker-join.jpg)
+
+After the worker joins, checking the ray status shows that all resources are ready—16 GPUs.
+
+![](./docs/images/2node-ray-status.jpg)
+
+
+
+Because my environment does not have an IB device, I configured it by setting NCCL_IB_DISABLE: 0 to disable IB, which will make the nodes communicate via SOCKET. (This method is only for debugging and demonstration, as the slower communication speed will negatively impact performance.)
+
+![](./docs/images/2node-loading-model-no-IB.jpg)
+
+![](./docs/images/2node-loading-model.jpg)
+
+After loading the model, you can see that the model weights only occupy 26GB of VRAM, with more VRAM reserved for the KVCache.
+
+When running benchmark inference, you can observe a high volume of communication in the network status; however, the performance is severely impacted due to network bandwidth limitations.
+
+![](./docs/images/2node-network-state.jpg)
+
+
+
+**Benchmarking on 2 nodes with 8xH100 GPUs without IB**
+
+![](./docs/images/2node-throughput-vs-client-request.jpg)
+
+![](./docs/images/2node-median-ttft-ttlt-vs-server-request.jpg)
+
+![](./docs/images/2node-server-vs-client-request.jpg)
+
+From the chart, it can be seen that due to communication bottlenecks, throughput hasn't improved dramatically and only reached around 4500. However, when measuring by output tokens, the primary bottleneck is the decoder's performance. With double the GPUs, even with limited communication performance, it reached above 980—nearly a twofold improvement. The QPS performance shows a similar pattern.
+
+
+
+**Deploy on Kubernetes**
+
+In production environments, multi-node management is often handled through cloud platforms such as Kubernetes. So, how can we configure it under Kubernetes?
+
+With the above docker-compose configuration, it can be easily transformed into a Kubernetes deployment.
+
+The only thing to note is the mechanism by which the current cloud platform manages GPU resources and how to request allocation. For example, by setting the deployment’s runtime as follows:
+
+```yaml
+runtimeClassName: nvidia
+```
+
+or by configuring tolerations, nodeSelector, etc.:
+
+```yaml
+tolerations:
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+nodeSelector:
+  kubernetes.io/hostname: g505
+```
+
+Also, consider how to mount persistent directories, especially if IB (InfiniBand) devices are involved—configure the corresponding device.
+
+With Helm, you can quickly deploy templates. Then, by combining with Terraform and other tools, you can implement IaaS to manage resources more easily.
+
+Of course, for model serving or training, Kubernetes is not strictly necessary. In particular, multi-node communication and device management are very complex tasks. Moreover, containerized platforms may incur certain latencies in resource scheduling. Using solutions like **Slurm** is another good alternative.
