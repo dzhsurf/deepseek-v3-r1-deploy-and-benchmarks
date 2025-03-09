@@ -177,3 +177,74 @@ Regarding TTFT (Total Time to First Token) and TTLT (Total Time to Last Token), 
 ![](./docs/images/server-client-request-rate.jpg)
 
 It can be seen that when the server's processing speed reaches 2.75 QPS.
+
+
+
+## Comparative Analysis
+
+**In practical applications, what about cases with a large number of input tokens?** 
+
+A common scenario is when the input consists of 4K tokens. Compare, for example, the throughput of inputs with 4K tokens versus 1K tokens.
+
+
+
+**TTFT/TTLT vs Request Rate**
+
+![](./docs/images/median-ttft-ttlt-vs-request-rate-i4096-i1024.jpg)
+
+
+
+**Token Throughput vs Server Request Complete Rate**
+
+![](./docs/images/token-throughput-vs-server-request-rate-i4096-i1024.jpg)
+
+
+
+**Server vs Client Request Rate**
+
+![](./docs/images/server-client-request-rate-i4096-i1024.jpg)
+
+
+
+From the chart, it can be seen that when processing an input of 4K tokens, although the overall token throughput quickly reaches a peak of nearly 3800, the output token throughput stops increasing once it reaches around 200. While the overall throughput shows slight growth, the efficiency of output tokens is reduced. Handling long token inputs is a significant challenge.
+
+
+
+**Will there be differences in throughput performance between Deepseek-V3 and Deepseek-R1?**
+
+From a technical architecture perspective, although both models have similar model architectures, their training architectures differ, and differences in performance and behavior may exist.
+
+This comparison is between the V3 model—with an input token limit of 1K and an output token limit of 256—and the R1 model.
+
+
+
+![](./docs/images/v3-r1-median-ttft-ttlt-vs-request-rate-i1024-o256.jpg)
+
+![](./docs/images/v3-r1-token-throughput-vs-server-request-rate-i1024-o256.jpg)
+
+![](./docs/images/v3-r1-server-client-request-rate-i1024-o256.jpg)
+
+
+
+From the chart, it can be seen that the TTFT and throughput of the V3 and R1 models do not differ, but the response latency of the R1 model is slightly slower than that of V3. As a result, the TTLT for R1 is lower than that of V3, which means that the overall QPS will also be lower.
+
+
+
+**The R1 model is a reasoning model, which typically means it produces long token outputs. In cases of long token outputs, would there be any performance differences?**
+
+Compare the scenario where the input token about 1K with an output of 256 tokens against the scenario where the output token count is 1K.
+
+![](./docs/images/r1-median-ttft-ttlt-vs-request-rate-i1024-o256-o1024-o4096.jpg)
+
+It can be seen that, due to the fixed input length, the TTFTs are essentially overlapping, and differences in the number of output tokens have no impact.
+
+![](./docs/images/r1-token-throughput-vs-server-request-rate-i1024-o256-o1024-o4096.jpg)
+
+The larger the number of output tokens, the overall token throughput is significantly reduced. 
+
+![](./docs/images/r1-server-client-request-rate-i1024-o256-o1024-o4096.jpg)
+
+
+
+
+
