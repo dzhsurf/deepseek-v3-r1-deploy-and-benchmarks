@@ -274,6 +274,26 @@ It can be seen that in terms of concurrent throughput, SGLang is much lower than
 
 
 
+**H100 FP8 vs FP16**
+
+AWQ quantization uses a W4A16 scheme, which means that after dequantization, activations are computed in FP16. According to the H100 performance report, FP8 offers better performance than FP16.
+
+In the TensorRT-LLM report (https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/quantization-in-TRT-LLM.md), the speedup achieved when comparing FP8 to FP16 is about 1.4×.
+
+![](./docs/images/h100-fp8-vs-fp16.jpg)
+
+Referencing Neuralmagic’s DeepSeek FP8 MLA optimization report (https://neuralmagic.com/blog/enhancing-deepseek-models-with-mla-and-fp8-optimizations-in-vllm/ ), under TP8PP2 H100 testing, a single node with 8 H100 GPUs achieved an output token throughput of 821.
+
+![](./docs/images/2node-8xh100-r1-fp8.jpg)
+
+In contrast, in tests on 8×H100 using AWQ, the output token throughput was approximately 620. This performance ratio is consistent with my own test results. Therefore, if sufficient hardware resources are available, deploying FP8 Serving can further enhance service capabilities. However, if limited to a single node, the AWQ quantized model—while not fully maximizing performance—still offers very good speed and quality.
+
+Furthermore, with the gradual introduction of next-generation high-end chips like the H200 and B200, we can expect even greater performance improvements.
+
+![](./docs/images/nvidia-deepseek-r1-throughput.jpg)
+
+
+
 ## Multi-Node Deployment and Testing under Kubernetes
 
 In a multi-node environment, to deploy vLLM we can use the Ray provided by vLLM to build a Ray cluster for pipeline parallelism.
